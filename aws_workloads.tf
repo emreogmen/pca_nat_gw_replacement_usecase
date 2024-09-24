@@ -27,7 +27,7 @@ module "key_pair" {
 
 
 resource "aws_security_group" "allow_all_rfc1918" {
-  count       = var.deploy_aws_tgw ? 2 : 1
+  count       = 1
   name        = "allow_all_rfc1918_vpc${count.index + 1}"
   description = "allow_all_rfc1918_vpc${count.index + 1}"
   vpc_id      = aws_vpc.default[count.index].id
@@ -56,7 +56,7 @@ resource "aws_security_group" "allow_all_rfc1918" {
 
 
 resource "aws_security_group" "allow_web_ssh_public" {
-  count       = var.deploy_aws_workloads ? 1 : 0
+  count       = 1
   name        = "allow_web_ssh_public"
   description = "allow_web_ssh_public"
   vpc_id      = aws_vpc.default[0].id
@@ -123,110 +123,7 @@ data "aws_ami" "amazon-linux-2" {
   }
 }
 
-data "aws_ami" "windows" {
-  most_recent = true
 
-  filter {
-    name   = "name"
-    values = ["Windows_Server-2022-English-Full-Base-*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
-}
-
-data "aws_ami" "guacamole" {
-  most_recent = true
-
-  filter {
-    name   = "owner-id"
-    values = ["979382823631"]
-  }
-
-  filter {
-    name   = "name"
-    values = ["bitnami-guacamole-1.5.3-10-r14-linux-debian-11-x86_64-hvm-ebs*"]
-  }
-}
-
-
-
-###################################################################################################################################################################################################
-
-#######################################
-####
-#### Guacamoli Creation
-####
-#######################################
-
-
-# Deploy Guacamole AMI for remote desktop access to the Windows host in VPC1. Configuration happens in the separate "config-guacamole" Terraform plan
-module "ec2_instance_guacamole" {
-  count  = var.deploy_aws_workloads ? 1 : 0
-  source = "terraform-aws-modules/ec2-instance/aws"
-
-  name = "guacamole-01"
-
-  ami                         = data.aws_ami.guacamole.image_id
-  instance_type               = "t3a.small"
-  key_name                    = module.key_pair[0].key_pair_name
-  monitoring                  = true
-  vpc_security_group_ids      = [aws_security_group.allow_web_ssh_public[0].id, aws_security_group.allow_all_rfc1918[0].id]
-  subnet_id                   = aws_subnet.public_vpc1[0].id
-  associate_public_ip_address = true
-
-  tags = {
-    Cloud       = "AWS"
-    Application = "Jump Server"
-  }
-
-
-
-}
-
-# Assign an EIP to Guacamole so that the URL doesn't change across reboots
-resource "aws_eip" "guacamole" {
-  count = var.deploy_aws_workloads ? 1 : 0
-  vpc   = true
-
-  instance                  = module.ec2_instance_guacamole[0].id
-  associate_with_private_ip = module.ec2_instance_guacamole[0].private_ip
-
-}
-
-# Wait for the Guacamole instance to deploy
-resource "time_sleep" "guacamole_ready" {
-  count      = var.deploy_aws_workloads ? 1 : 0
-  depends_on = [module.ec2_instance_guacamole]
-
-  create_duration = "250s"
-}
-
-# SSH to the Guacamole instance and get the UI login
-resource "ssh_resource" "guac_password" {
-  count = var.deploy_aws_workloads ? 1 : 0
-  # The default behaviour is to run file blocks and commands at create time
-  # You can also specify 'destroy' to run the commands at destroy time
-  when = "create"
-
-  host        = aws_eip.guacamole[0].public_dns
-  user        = "bitnami"
-  private_key = module.key_pair[0].private_key_pem
-
-  timeout = "15m"
-
-  commands = [
-    "sudo cat /home/bitnami/bitnami_credentials"
-  ]
-  depends_on = [
-    time_sleep.guacamole_ready
-  ]
-}
 
 ###################################################################################################################################################################################################
 
@@ -240,45 +137,14 @@ resource "ssh_resource" "guac_password" {
 
 ## Wait for NAT GW's to be ready before deploying private workloads
 resource "time_sleep" "egress_ready" {
-  depends_on = [aws_nat_gateway.vpc1, aws_nat_gateway.vpc2]
+  depends_on = [aws_nat_gateway.vpc1]
 
   create_duration = "90s"
 }
 
-## Deploy Windows Jump Host in VPC1, AZ1
-module "ec2_instance_windows" {
-  count = var.deploy_aws_workloads ? 1 : 0
-
-  source = "terraform-aws-modules/ec2-instance/aws"
-
-  name = "windows-jump-${count.index + 1}"
-
-  ami                         = data.aws_ami.windows.image_id
-  instance_type               = "t3a.small"
-  key_name                    = module.key_pair[0].key_pair_name
-  monitoring                  = true
-  vpc_security_group_ids      = [aws_security_group.allow_all_rfc1918[0].id]
-  subnet_id                   = aws_subnet.private_vpc1[count.index].id
-  associate_public_ip_address = false
-  user_data                   = file("windows_init.txt")
-  get_password_data           = true
-
-  tags = {
-    OS = "Windows"
-    Application = "RDS"
-  }
-  depends_on = [
-    time_sleep.egress_ready
-  ]
-#   lifecycle {
-#     ignore_changes = [ami, ]
-#   }
-
-}
-
 ## Deploy Linux Test Hosts in VPC1, All AZs running Gatus for connectivity testing
 module "ec2_instance_vpc1" {
-  count  = var.deploy_aws_workloads ? var.number_of_azs : 0
+  count  = var.number_of_azs
   source = "terraform-aws-modules/ec2-instance/aws"
 
   name = "vpc1-workload-${count.index}"
@@ -289,7 +155,7 @@ module "ec2_instance_vpc1" {
   monitoring                  = true
   vpc_security_group_ids      = [aws_security_group.allow_all_rfc1918[0].id]
   subnet_id                   = aws_subnet.private_vpc1[count.index].id
-  user_data                   = var.deploy_aws_tgw ? templatefile("${path.module}/vpc1_test_server_tgw.tftpl", { vpc2_server = "${module.ec2_instance_vpc2[0].private_ip}", az = "${count.index + 1}" }) : templatefile("${path.module}/vpc1_test_server.tftpl", { az = "${count.index + 1}" })
+  user_data                   = templatefile("${path.module}/vpc1_test_server.tftpl", { az = "${count.index + 1}" })
   user_data_replace_on_change = true
 
   tags = {
@@ -364,47 +230,11 @@ resource "aws_lb_target_group_attachment" "test-machine-ingress" {
   port             = 80
 }
 
-
-
-###################################################################################################################################################################################################
-
-#######################################
-####
-#### Workload VPC2 Creation
-####
-#######################################
-
-
-## Deploy Linux test host in VPC2, running a simple web server container to test connectivity across TGW
-module "ec2_instance_vpc2" {
-  count  = var.deploy_aws_tgw && var.deploy_aws_workloads ? 1 : 0
-  source = "terraform-aws-modules/ec2-instance/aws"
-
-  name = "vpc2-workload-${count.index}"
-
-  ami                         = data.aws_ami.amazon-linux-2.image_id
-  instance_type               = "t3a.micro"
-  key_name                    = module.key_pair[0].key_pair_name
-  monitoring                  = true
-  vpc_security_group_ids      = [aws_security_group.allow_all_rfc1918[1].id]
-  subnet_id                   = aws_subnet.private_vpc2[0].id
-  user_data                   = file("${path.module}/vpc2_web_server.tftpl")
-  user_data_replace_on_change = true
-
-  tags = {
-    OS = "Linux"
-    Application = "Web App"
-  }
-#   lifecycle {
-#     ignore_changes = [ami, ]
-#   }
-depends_on = [
-  aws_route_table.vpc2_private
-]
+output "lb_dns_name1" {
+  value = "http://${aws_lb.test-machine-ingress[0].dns_name}:80/"
 }
 
-
-
-
-
+output "lb_dns_name2" {
+  value = "http://${aws_lb.test-machine-ingress[0].dns_name}:81/"
+}
 

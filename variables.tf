@@ -64,17 +64,17 @@ variable "tags" {
 #######################################
 
 
-variable "deploy_aws_tgw" {
-  type = bool
-  description = "Deploys a second VPC and a TGW to attach to the VPC.  This is to demonstrate seamless integration of Aviatrix Secure Egress into an existing transit architecture."
-  default = false
-}
+# variable "deploy_aws_tgw" {
+#   type = bool
+#   description = "Deploys a second VPC and a TGW to attach to the VPC.  This is to demonstrate seamless integration of Aviatrix Secure Egress into an existing transit architecture."
+#   default = false
+# }
 
-variable "deploy_aviatrix_transit" {
-  type = bool
-  description = "Deploys a second VPC and a TGW to attach to the VPC.  This is to demonstrate seamless integration of Aviatrix Secure Egress into an existing transit architecture."
-  default = false
-}
+# variable "deploy_aviatrix_transit" {
+#   type = bool
+#   description = "Deploys a second VPC and a TGW to attach to the VPC.  This is to demonstrate seamless integration of Aviatrix Secure Egress into an existing transit architecture."
+#   default = false
+# }
 
 variable "deploy_aws_workloads" {
   type = bool
@@ -82,21 +82,21 @@ variable "deploy_aws_workloads" {
   default = true
 }
 
-variable "deploy_dfw_egress_policy" {
-  type = bool
-  description = "Deploy a Aviatrix Secure Egress configuration leveraging Egress 2.0."
-  default = false
-}
+# variable "deploy_dfw_egress_policy" {
+#   type = bool
+#   description = "Deploy a Aviatrix Secure Egress configuration leveraging Egress 2.0."
+#   default = false
+# }
 
-variable "deploy_avx_egress_policy" {
-  type = bool
-  description = "Deploy a Aviatrix Secure Egress configuration leveraging the legacy FQDN Egress policy configuration."
-  default = false
-}
+# variable "deploy_avx_egress_policy" {
+#   type = bool
+#   description = "Deploy a Aviatrix Secure Egress configuration leveraging the legacy FQDN Egress policy configuration."
+#   default = false
+# }
 
-variable "enable_nat_avx_egress_gateways" {
-  type = bool
-  description = "Enable NAT on the Aviatrix Egress Gateways"
-  default = false
-}
+# variable "enable_nat_avx_egress_gateways" {
+#   type = bool
+#   description = "Enable NAT on the Aviatrix Egress Gateways"
+#   default = false
+# }
 
