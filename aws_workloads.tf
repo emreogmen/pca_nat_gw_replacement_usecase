@@ -282,3 +282,21 @@ module "egress_gw" {
   vpc_id          = aws_vpc.default[count.index].id
   gw_subnet       = aws_subnet.public_vpc1[count.index].cidr_block
 }
+
+resource "aviatrix_web_group" "wg_whitelist" {
+  name = "wg_whitelist_egress_demo"
+  selector {
+    match_expressions {
+      snifilter = "github.com"
+    }
+    match_expressions {
+      snifilter = "*.github.com"
+    }
+    match_expressions {
+      snifilter = "*.ubuntu.com"
+    }
+    match_expressions {
+      snifilter = "ubuntu.com"
+    }
+  }
+}
