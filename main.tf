@@ -16,7 +16,7 @@
 ###################################################################################################################################################################################################
 
 ### This code will deploy a VPC in AWS with 2 Linux workloads running Gatus
-### It can also deploy an Aviatrix Spoke gateway for egress if you choose to (default is to deploy)
+### It can also deploy an Aviatrix Spoke gateway for egress if you choose to (default is to deploy). This is to accelerate the demo process.
 ###
 ### Before running, please note the following:
 ###
