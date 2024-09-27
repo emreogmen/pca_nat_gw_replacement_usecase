@@ -65,7 +65,7 @@ provider "aws" {
   region = var.aws_region
   # shared_credentials_files = ["~/.aws/credentials"]
   # profile = "SubAccountAdmin-535708457972"
-  profile = var.aws_profile  # Use the aws_profile variable here
+  # profile = var.aws_profile  # Use the aws_profile variable here
   #access_key = var.aws_access_key
   #secret_key = var.aws_secret_key
 }
