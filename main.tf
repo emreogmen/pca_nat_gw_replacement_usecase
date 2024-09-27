@@ -53,7 +53,7 @@ terraform {
 provider "aviatrix" {
   skip_version_validation = true
   username = var.aviatrix_username
-  controller_ip = var.aviatrix_controller
+  controller_ip = var.aviatrix_controller_ip
   password = var.aviatrix_password
 }
 
