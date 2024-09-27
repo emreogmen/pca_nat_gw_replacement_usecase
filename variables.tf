@@ -22,6 +22,23 @@
 ####
 #######################################
 
+variable "aviatrix_username" {
+  description = "Aviatrix Controller admin username"
+  type        = string
+}
+
+variable "aviatrix_controller_ip" {
+  description = "IP address of the Aviatrix Controller"
+  type        = string
+}
+
+variable "aviatrix_password" {
+  description = "Aviatrix Controller admin password"
+  type        = string
+  sensitive   = true  # Marking it as sensitive to hide it in logs
+}
+
+
 variable "aws_credentials_path" {
   description = ".aws/credentials"
   default     = "~/.aws/credentials"
