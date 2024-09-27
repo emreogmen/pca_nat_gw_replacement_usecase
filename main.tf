@@ -55,7 +55,6 @@ provider "aviatrix" {
   username = var.aviatrix_username
   controller_ip = var.aviatrix_controller_ip
   password = var.aviatrix_password
-  aws_account_name = var.aviatrix_aws_account_name
 }
 
 
