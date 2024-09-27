@@ -38,6 +38,10 @@ variable "aviatrix_password" {
   sensitive   = true  # Marking it as sensitive to hide it in logs
 }
 
+variable "aws_profile" {
+  description = "The AWS profile to use for authentication"
+  type        = string
+}
 
 variable "aws_credentials_path" {
   description = ".aws/credentials"
