@@ -16,9 +16,10 @@
 ![Paul Aviatrix Template v2 - Page 10](https://github.com/user-attachments/assets/ad1ca413-cf3c-49bf-ae85-2444b0a7b575)
 
 
-Terraform Variable fields as shown below.
+# Terraform Variable Fields
 
-<img width="1548" alt="image" src="https://github.com/user-attachments/assets/0aed649c-3c9e-404f-a5c6-071945bb2c79">
+![image](https://github.com/user-attachments/assets/4f5d7e01-1e8c-4734-b1e4-4066a01f537a)
+
 
 | Variable | Description |
 | ------------- | ------------- |
