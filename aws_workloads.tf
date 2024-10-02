@@ -86,6 +86,13 @@ resource "aws_security_group" "allow_web_ssh_public" {
     cidr_blocks = ["${chomp(data.http.myip.response_body)}/32"]
   }
   ingress {
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = "0.0.0.0/0"
+  }
+  ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 83
