@@ -6,6 +6,7 @@ sudo systemctl enable docker
 sudo cat > config.yaml << EOL
 ui:
   header: "Test Workload - VPC1 - AZ${az}"
+  refresh-inverval: 10
 endpoints:
   - name: www.google.com
     url: "https://www.google.com"
@@ -50,5 +51,4 @@ endpoints:
     conditions:
       - "[CONNECTED] == true"
 EOL
-#sudo docker run -d --restart unless-stopped --name gatus -p 80:8080 --mount type=bind,source="$(pwd)"/config.yaml,target=/config/config.yaml twinproduction/gatus
-sudo docker run -d --restart unless-stopped --name gatus -p 80:8080 --mount type=bind,source="$(pwd)"/config.yaml,target=/config/config.yaml -e WEB_REFRESH_INTERVAL=5 twinproduction/gatus
+sudo docker run -d --restart unless-stopped --name gatus -p 80:8080 --mount type=bind,source="$(pwd)"/config.yaml,target=/config/config.yaml twinproduction/gatus
