@@ -87,8 +87,8 @@ resource "aws_security_group" "allow_web_ssh_public" {
   }
   ingress {
     description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
+    from_port   = 80
+    to_port     = 83
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
