@@ -78,7 +78,18 @@ resource "random_string" "name" {
   special = false
 }
 
+# Data source to fetch the AviatrixController instance by tag
+data "aws_instance" "aviatrix_controller" {
+  filter {
+    name   = "tag:Name"  # Filter by the Name tag
+    values = ["AviatrixController"]  # The tag value for the Controller instance
+  }
+}
 
+# Output the public IP of the Aviatrix Controller
+output "controller_public_ip" {
+  value = data.aws_instance.aviatrix_controller.public_ip
+}
 
 
 data "http" "myip" {
