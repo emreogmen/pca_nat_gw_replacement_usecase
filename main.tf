@@ -49,27 +49,28 @@ terraform {
 }
 
 # Data source to fetch the AviatrixController instance by tag
-data "aws_instance" "aviatrix_controller" {
-  filter {
-    name   = "tag:Name"  # Filter by the Name tag
-    values = ["AviatrixController"]  # The tag value for the Controller instance
-  }
-}
+#data "aws_instance" "aviatrix_controller" {
+#  filter {
+#    name   = "tag:Name"  # Filter by the Name tag
+#    values = ["AviatrixController"]  # The tag value for the Controller instance
+#  }
+#}
 
 # Output the public IP of the Aviatrix Controller
-output "controller_public_ip" {
-  value = data.aws_instance.aviatrix_controller.public_ip
-}
+#output "controller_public_ip" {
+#  value = data.aws_instance.aviatrix_controller.public_ip
+#}
 
 # Local variable to store the public IP
-locals {
-  controller_ip = data.aws_instance.aviatrix_controller.public_ip
-}
+#locals {
+#  controller_ip = data.aws_instance.aviatrix_controller.public_ip
+#}
 
 provider "aviatrix" {
   skip_version_validation = true
   username = var.aviatrix_username
-  controller_ip = local.controller_ip
+  #controller_ip = local.controller_ip
+  controller_ip = var.aviatrix_controller_ip
   password = var.aviatrix_password
 }
 
